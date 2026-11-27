@@ -1,0 +1,503 @@
+
+
+
+---------------------------------------------database---------------Get_pont_lagba----
+      $table->id();
+            $table->string('Grade_name')->nullable();
+             $table->string('Grade_point')->nullable();
+              $table->integer('start_mark')->nullable();
+               $table->integer('end_mark')->nullable();
+
+                 $table->string('start_point')->nullable();
+               $table->string('end_point')->nullable();
+
+                $table->string('point_range')->nullable();
+                 $table->string('Remark')->nullable();
+
+            $table->timestamps();
+-------------------------------------------------------mark_table
+
+
+
+
+
+
+    $table->id();
+            $table->string('student_id')->nullable();
+             $table->integer('subject_id')->nullable();
+            $table->string('roll_id')->nullable();
+            $table->integer('year_id')->nullable();
+             $table->integer('class_id')->nullable();
+              $table->integer('depart_id')->nullable();
+               $table->integer('examtype_id')->nullable();
+                $table->string('marks')->nullable();
+
+
+            $table->timestamps();
+-------------------------------------------------------------------
+
+
+
+
+
+
+
+public function ResutlsController(Request $request){
+
+$result=Studentmarked::where('year_id',$request->batch_id)
+->where('class_id',$request->Semester_id)
+->where('depart_id',$request->Department)
+->where('examtype_id',$request->examtype_id)
+->first();
+
+
+
+
+
+if($result==true){
+
+
+$allresult=Studentmarked::with(['examtype','dpi','spi','student','bpi'])->select('year_id','class_id','depart_id','examtype_id','student_id')
+->where('year_id',$request->batch_id)
+->where('class_id',$request->Semester_id)
+->where('depart_id',$request->Department)
+->where('examtype_id',$request->examtype_id)
+
+->groupBy('year_id')->groupBy('class_id')->groupBy('depart_id')->groupBy('examtype_id')->groupBy('student_id')
+
+->get();
+
+
+$pdf=PDF::loadview('admin.Report.result.print',['allresult'=>$allresult]);
+return $pdf->stream('document.pdf');
+
+
+
+
+ //return view('admin.Report.result.print',compact('allresult','count_fail'));
+
+
+}else{
+       $notification=array('messege' => ' sorry!', 'alert-type' => 'success');
+        return redirect()->back()->with($notification);
+
+
+
+}
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+-------------------------------------controller-------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Student Result</title>
+
+
+
+<link rel="stylesheet" href="{{asset('public/shiplu')}}/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+<style>
+	table{
+		border-collapse:collapse ;
+	}
+
+h2 h3{
+	margin: 0;
+	padding: 0;
+}
+.table{
+	width: 100%;
+	margin-bottom: 1rem;
+	background-color: transparent;
+}
+.table th,
+.table td{
+	padding: 0.75rem;
+	vertical-align: bottom;
+	border-top: 1px solid #dee2e6;
+}
+
+.table thead th{
+	vertical-align: bottom;
+	border-bottom: 2px solid #dee2e6;
+}
+.table tbody + tbody{
+	border-top: 2px solid #dee2e6;
+}
+.table .table{
+	background: #fff;
+}
+
+.table-bordered{
+	border: 1px solid #dee2e6;
+}
+.table-bordered th,
+.table-bordered td{
+	border: 1px solid #dee2e6;
+}
+.table-bordered thead th,
+.table-bordered thead td{
+	border-bottom-width: 2px;
+}
+.text-center{
+	text-align: center;
+}
+.text-right{
+	text-align: center;
+}
+table tr td{
+	padding: 5px;
+}
+.table-bordered thead th,
+.table-bordered td,.table-bordered th{
+	border: 1px solid black !important;
+}
+.table-bordered thead th{
+	background-color: #cacaca ;
+
+}
+</style>
+
+
+</head>
+<body>
+	<div class="container">
+		
+<div class="row">
+	
+<div class="col-md-12">
+	<table width="80%">
+		<tr>
+			<td width="33%" class="text-center"><img src="" style="width:100px;height: 100px;"></td>
+			<td class="text-center" width="63%">
+				<h4>Universitry and School</h4>
+				<h5></h5>
+				<h6></h6>
+			</td>
+
+		</tr>
+		
+
+
+	</table>
+	
+</div>
+
+<div class="col-md-12 text-center">
+	<h5 style="font-weight: bold;padding-top: -25px;">Student Result</h5>
+</div>
+<p><strong>{{$allresult['0']['examtype']['name']}}</strong></p>
+<div class="col-md-12">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<table border="1" width="100%">
+		<thead>
+			<tr>
+				<th>SL NO</th>
+				<th >student_Name</th>
+				<th>ID_NO</th>
+				<th width="10%">Grade_Letter</th>
+				<th width="10%">Grade_point</th>
+				<th width="15%">Remarks</th>
+			</tr>
+		</thead>
+		<tbody>
+                                                
+		      @php
+      
+                                             
+                                             
+         @endphp
+		
+
+			@foreach($allresult as $key=>$data)
+
+                 @php
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+                $allmarks=App\Models\Studentmarked::where('year_id',$data->year_id)
+                ->where('class_id',$data->class_id)
+
+                                                     
+                                                          
+                                                           ->where('depart_id',$data->depart_id)
+                                                        ->where('examtype_id',$data->examtype_id)
+                                                          ->where('student_id',$data->student_id)
+
+
+                                                          ->get();
+  $total_marks=0;
+        $total_point=0;
+
+
+                        foreach($allmarks as $value){
+
+
+
+
+$count_fail =DB::table('marks')->where('year_id',$value->year_id)
+->where('class_id',$value->class_id)
+->where('depart_id',$value->depart_id)
+->where('examtype_id',$value->examtype_id)
+->where('student_id',$value->student_id)->where('marks','<','33')->get()->count();
+
+
+	 $get_mark=$value->marks;
+
+
+
+
+                                                $total_marks=(float)$total_marks+(float)$get_mark;
+
+
+                 
+      $grade_marks=App\Models\Getpointed::where([['start_mark','<=',(int)$get_mark],['end_mark','>=',(int)$get_mark]])->first();
+
+      
+      
+
+
+$grade_name= $grade_marks->Grade_name;
+
+$grade_point= number_format((float)$grade_marks->Grade_point,2);
+$total_point=(float)$total_point+(float)$grade_point;
+
+
+
+
+
+
+
+
+
+
+                        }                                  
+
+
+                 @endphp
+
+
+
+
+
+
+             
+
+
+
+
+				<tr>
+				<td>{{$key+1}}</td>
+				<td>{{$data['student']['First_Name']}}</td>
+				<td>{{$data['student']['student_id']}}</td>
+
+				@php
+
+ $total_subject=  App\Models\Studentmarked::where('year_id',$data->year_id)
+                ->where('class_id',$data->class_id)
+
+                                                     
+                                                          
+                                                           ->where('depart_id',$data->depart_id)
+                                                        ->where('examtype_id',$data->examtype_id)
+                                                          ->where('student_id',$data->student_id)
+
+
+                                                          ->get()->count();
+
+
+
+
+                                             $total_grade=0;
+
+
+
+
+                           $point_grade=(float)$total_point/(float)$total_subject;
+
+
+      $total_grade=App\Models\Getpointed::where([['start_point','<=',$point_grade],['end_point','>=',$point_grade]])->first();
+
+     
+
+
+
+                
+
+
+
+                                                
+$grade_avg=(float)$total_point/(float)$total_subject;
+
+
+
+
+				@endphp
+
+	
+					
+
+
+			
+								<td>
+									      @if($count_fail > 0)
+                                                    F
+                                                    @else
+                                                    {{$total_grade->Grade_name}}
+                                                 
+
+                                                  
+                                                
+
+                                                    @endif 
+			
+					
+
+				</td>
+				<td>
+				 @if($count_fail > 0)
+                                               0.00
+
+                                                   
+                                                    @else
+                                                     {{number_format((float)$grade_avg,2)}}
+                                                 
+                                                    @endif   
+
+
+
+
+				</td>
+                                                    <td>
+
+
+       @if($count_fail > 0)
+                  Fail
+                    @else
+                 
+   {{$total_grade->Remark}}
+   @endif
+                                                    	    
+         
+                                                    </td>
+				</tr>
+				   @endforeach
+			
+			
+		
+
+              
+
+
+
+		
+		</tbody>
+		
+	</table>
+	<i style="font-size:10px;float: right;">Print Date:{{date('d-m-y')}}</i>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div><br>
+<div class="col-md-12">
+	<table border="0" width="100%">
+		<tr>
+			<td style="width:30%"></td>
+			<td style="width:30%"></td>
+			<td style="width:40%; text-align: center;">
+			<hr style="border:solid 1px;width: 60%; color: #000; margin-bottom: 0px;">
+			<p style="text-align: center;">Principal/Headmaster</p>
+			</td>
+		</tr>
+		
+
+	</table>
+	
+
+</div>
+
+
+	</div>
+
+
+
+</body>
+</html>
